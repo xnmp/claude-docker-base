@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-HOST_UID=$(stat -c '%u' /home/claudeuser/app 2>/dev/null || echo "1000")
+HOST_UID=$(stat -c '%u' . 2>/dev/null || echo "1000")
 CURRENT_UID=$(id -u claudeuser)
 
 if [ "$HOST_UID" != "$CURRENT_UID" ] && [ "$HOST_UID" != "0" ]; then

@@ -46,7 +46,7 @@ RUN git config --global user.email "claudeuser@example.com" && \
     git config --global user.name "Claude Sandbox"
 USER root
 
-WORKDIR /home/claudeuser/app
+WORKDIR /home/claudeuser
 ENV CLAUDE_CODE_DISABLE_AUTO_UPDATE=1
 
 COPY entrypoint.sh /entrypoint.sh
