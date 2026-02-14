@@ -1,19 +1,32 @@
-FROM debian:bookworm-slim
+FROM node:22-slim
 
-# Install dependencies (git required by Claude, curl for installer, gosu for UID mapping)
-RUN apt-get update && apt-get install -y git curl gosu && rm -rf /var/lib/apt/lists/*
+# Layer 1: System packages (stable, rarely changes)
+RUN apt-get update && apt-get install -y git curl gosu unzip jq && rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user with default UID (will be remapped at runtime)
+# Layer 2: User creation and PATH setup
 RUN useradd -m -s /bin/bash claudeuser
+ENV PATH="/home/claudeuser/.local/bin:/home/claudeuser/.bun/bin:/home/claudeuser/.cargo/bin:$PATH"
 
-# Install Claude Code as claudeuser via native installer
+# Layer 3: Rust (slow to install, rarely changes)
 USER claudeuser
-RUN curl -fsSL https://claude.ai/install.sh | bash
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+USER root
+
+# Layer 4: Claude Code, bun, uv, beads (faster installs, change more often)
+USER claudeuser
+RUN curl -fsSL https://claude.ai/install.sh | bash && \
+    curl -fsSL https://bun.sh/install | bash && \
+    curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh | bash
+USER root
+
+# Layer 5: Git config and entrypoint
+USER claudeuser
+RUN git config --global user.email "claudeuser@example.com" && \
+    git config --global user.name "Claude Sandbox"
 USER root
 
 WORKDIR /home/claudeuser/app
-
-ENV PATH="/home/claudeuser/.local/bin:$PATH"
 ENV CLAUDE_CODE_DISABLE_AUTO_UPDATE=1
 
 COPY entrypoint.sh /entrypoint.sh
