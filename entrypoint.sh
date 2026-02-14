@@ -5,10 +5,22 @@ HOST_UID=$(stat -c '%u' /home/claudeuser/app 2>/dev/null || echo "1000")
 CURRENT_UID=$(id -u claudeuser)
 
 if [ "$HOST_UID" != "$CURRENT_UID" ] && [ "$HOST_UID" != "0" ]; then
+    # If another user already owns the target UID, remove it first
+    EXISTING_USER=$(getent passwd "$HOST_UID" | cut -d: -f1)
+    if [ -n "$EXISTING_USER" ] && [ "$EXISTING_USER" != "claudeuser" ]; then
+        echo "[entrypoint] Removing $EXISTING_USER (owns UID $HOST_UID)"
+        userdel "$EXISTING_USER"
+    fi
     echo "[entrypoint] Remapping claudeuser UID $CURRENT_UID -> $HOST_UID to match mounted volume"
     usermod -u "$HOST_UID" claudeuser
     chown -R "$HOST_UID" /home/claudeuser/.local
 fi
+
+# Ensure cargo/sccache cache volumes (if mounted) are owned by claudeuser
+CLAUDE_UID="$(id -u claudeuser)"
+chown -R "$CLAUDE_UID" /home/claudeuser/.cargo
+mkdir -p /home/claudeuser/.cache/sccache
+chown -R "$CLAUDE_UID" /home/claudeuser/.cache/sccache
 
 # Copy read-only host config to writable location so Claude Code can
 # write runtime data (sessions, caches) without modifying the host.
