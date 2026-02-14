@@ -12,15 +12,19 @@ USER claudeuser
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 USER root
 
-# Layer 4: Claude Code, bun, uv, beads (faster installs, change more often)
+# Layer 4: bun, uv, beads (fast installs, moderate change frequency)
 USER claudeuser
-RUN curl -fsSL https://claude.ai/install.sh | bash && \
-    curl -fsSL https://bun.sh/install | bash && \
+RUN curl -fsSL https://bun.sh/install | bash && \
     curl -LsSf https://astral.sh/uv/install.sh | sh && \
     curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh | bash
 USER root
 
-# Layer 5: Git config and entrypoint
+# Layer 5: Claude Code (slowest single install, changes most often)
+USER claudeuser
+RUN curl -fsSL https://claude.ai/install.sh | bash
+USER root
+
+# Layer 6: Git config and entrypoint
 USER claudeuser
 RUN git config --global user.email "claudeuser@example.com" && \
     git config --global user.name "Claude Sandbox"
