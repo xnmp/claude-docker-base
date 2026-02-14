@@ -10,6 +10,14 @@ if [ "$HOST_UID" != "$CURRENT_UID" ] && [ "$HOST_UID" != "0" ]; then
     chown -R "$HOST_UID" /home/claudeuser/.local
 fi
 
+# Copy read-only host config to writable location so Claude Code can
+# write runtime data (sessions, caches) without modifying the host.
+if [ -d /home/claudeuser/.claude-host ]; then
+    echo "[entrypoint] Copying host ~/.claude config (read-only mount) to writable location"
+    cp -a /home/claudeuser/.claude-host /home/claudeuser/.claude
+    chown -R "$HOST_UID" /home/claudeuser/.claude
+fi
+
 # Symlink host home path so absolute paths in plugin configs resolve correctly.
 # installed_plugins.json stores installPath as /home/<host_user>/... which won't
 # exist inside the container where home is /home/claudeuser.
