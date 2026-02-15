@@ -13,7 +13,7 @@ Vagrant.configure("2") do |config|
     lv.memorybacking :access, :mode => "shared"
   end
 
-  config.vm.synced_folder ".", "/agent-workspace", type: "virtiofs"
+  config.vm.synced_folder ".", "/home/vagrant/#{dir_name}", type: "virtiofs"
 
   # Package Claude config on the host before uploading.
   # Vagrant's file provisioner can't handle broken symlinks (e.g. debug/latest),

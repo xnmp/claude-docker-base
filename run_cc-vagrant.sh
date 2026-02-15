@@ -34,4 +34,4 @@ exec ssh -t \
     -i "$(echo "$SSH_CONFIG" | awk '/IdentityFile/ {print $2}')" \
     -p "$(echo "$SSH_CONFIG" | awk '/Port / {print $2}')" \
     vagrant@"$(echo "$SSH_CONFIG" | awk '/HostName/ {print $2}')" \
-    "cd /agent-workspace && claude --dangerously-skip-permissions"
+    "cd ~/$(basename "$PWD") && claude --dangerously-skip-permissions"
