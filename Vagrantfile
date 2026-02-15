@@ -39,12 +39,10 @@ Vagrant.configure("2") do |config|
     curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
     apt-get install -y nodejs git
 
-    # Claude Code
-    npm install -g @anthropic-ai/claude-code
+    # Claude Code (native installer, matches host install method)
+    su - vagrant -c "curl -fsSL https://claude.ai/install.sh | bash"
 
-    # Host config has installMethod=native, which expects ~/.local/bin
-    mkdir -p /home/vagrant/.local/bin
-    ln -sf "$(which claude)" /home/vagrant/.local/bin/claude
-    chown -R vagrant:vagrant /home/vagrant/.local
+    # Add ~/.local/bin to PATH for non-login shells (SSH commands)
+    grep -q '.local/bin' /home/vagrant/.bashrc || echo 'export PATH="$HOME/.local/bin:$PATH"' >> /home/vagrant/.bashrc
   SHELL
 end
