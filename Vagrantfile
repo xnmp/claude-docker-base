@@ -41,5 +41,10 @@ Vagrant.configure("2") do |config|
 
     # Claude Code
     npm install -g @anthropic-ai/claude-code
+
+    # Host config has installMethod=native, which expects ~/.local/bin
+    mkdir -p /home/vagrant/.local/bin
+    ln -sf "$(which claude)" /home/vagrant/.local/bin/claude
+    chown -R vagrant:vagrant /home/vagrant/.local
   SHELL
 end
