@@ -27,10 +27,13 @@ vagrant up
 
 # Use direct SSH — vagrant ssh swallows stdout on some libvirt setups.
 SSH_CONFIG=$(vagrant ssh-config 2>/dev/null | grep -v '^\[')
-exec ssh -t \
+exec ssh -tt \
     -o StrictHostKeyChecking=no \
     -o UserKnownHostsFile=/dev/null \
     -o LogLevel=ERROR \
+    -o Compression=no \
+    -o ServerAliveInterval=0 \
+    -o Ciphers=aes128-gcm@openssh.com \
     -i "$(echo "$SSH_CONFIG" | awk '/IdentityFile/ {print $2}')" \
     -p "$(echo "$SSH_CONFIG" | awk '/Port / {print $2}')" \
     vagrant@"$(echo "$SSH_CONFIG" | awk '/HostName/ {print $2}')" \
